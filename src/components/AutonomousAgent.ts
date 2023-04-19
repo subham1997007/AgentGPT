@@ -2,6 +2,11 @@ import axios from "axios";
 import type { ModelSettings } from "../utils/types";
 import AgentService from "../services/agent-service";
 import {
+  createAgent,
+  executeAgent,
+  startAgent,
+} from "../services/agent-service";
+import { GPT_4 } from "../utils/constants";
   DEFAULT_MAX_LOOPS_CUSTOM_API_KEY,
   DEFAULT_MAX_LOOPS_FREE,
   DEFAULT_MAX_LOOPS_PAID,
@@ -54,6 +59,15 @@ class AutonomousAgent {
       }
     } catch (e) {
       console.log(e);
+      this.sendErrorMessage(
+        this.modelSettings.customApiKey !== ""
+          ? `ERROR retrieving initial tasks array. Make sure ${
+              this.modelSettings.customModelName === GPT_4
+                ? "you have the API key for GPT 4"
+                : "your API key is not the free tier"
+            }, make your goal more clear, or revise your goal such that it is within our model's policies to run. Shutting Down.`
+          : `ERROR retrieving initial tasks array. Retry, make your goal more clear, or revise your goal such that it is within our model's policies to run. Shutting Down.`
+      );
       this.sendErrorMessage(getMessageFromError(e));
       this.shutdown();
       return;
